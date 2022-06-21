@@ -28,10 +28,8 @@ defmodule Gtimer do
     new_state = 
       case Map.get(state[:map],timer_ref,:undefined) do
         :undefined ->
-          IO.puts("no reference #{inspect timer_ref} in map")
           state
        map_item ->
-          IO.puts("found map_item #{inspect map_item}")
           pqueue_ref = map_item[:pqueue_ref]
           :epqueue.remove(state[:pqueue],pqueue_ref)
           %{ state | map: Map.drop(state[:map],[timer_ref]) }
