@@ -8,5 +8,6 @@ A small library which provides a global timer facility in Elixir (or Erlang). Th
     cancels a running timer.
 
 If a running timer is not cancelled when the timer expires the process which called new_timer(timeout) will be terminated. 
-Timers are stored in a priority queue, and using a map, which affords logarithmic worst-case time complexity for both function calls 
-(in terms of the number of timers running).
+Timer management is done in a separate (GenServer) process which will be linked to the process executing the new_timer call.
+Inside the process timers are stored in a priority queue, and using a map, which affords logarithmic worst-case time complexity for both function calls 
+(in terms of the number of timers running). 
