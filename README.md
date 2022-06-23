@@ -16,7 +16,9 @@ Inside the process timers are stored in a priority queue, and using a map, which
 (in terms of the number of timers running). 
 
 An example:
+
     timer_ref = Gtimer.new_timer(1000,fn pid -> Process.exit(pid,:because) end)
+
 This will start a new timer which when it expires kills the process which invoked
 the call to `new_timer`.
 
