@@ -2,7 +2,6 @@ defmodule Gtimer do
   use GenServer
 
   def init(_) do
-    IO.puts("starting Gtimer")
     {:ok,pqueue} = :epqueue.new()
     {:ok, %{pqueue: pqueue, map: %{}, counter: 0}}
   end
@@ -70,7 +69,7 @@ defmodule Gtimer do
   end
 
   def handle_info(other, state) do
-    IO.puts("*** WARNING: gtimer: unexpected message #{inspect other} received")
+    IO.puts("*** WARNING: Gtimer: unexpected message #{inspect other} received")
     {:noreply, state}
   end
 
