@@ -14,3 +14,10 @@ terminating the process `pid`, and displaying an informative message, will be ta
 Timer management is done in a separate (GenServer) process which will be linked to the process executing the new_timer call.
 Inside the process timers are stored in a priority queue, and using a map, which affords logarithmic worst-case time complexity for both function calls 
 (in terms of the number of timers running). 
+
+An example:
+    timer_ref = Gtimer.new_timer(1000,fn pid -> Process.exit(pid,:because) end)
+This will start a new timer which when it expires kills the process which invoked
+the call to `new_timer`.
+
+
