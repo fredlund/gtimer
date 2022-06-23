@@ -2,14 +2,15 @@ defmodule Gtimer do
   use GenServer
 
   def init(_) do
+    IO.puts("starting Gtimer")
     {:ok,pqueue} = :epqueue.new()
     {:ok, %{pqueue: pqueue, map: %{}, counter: 0}}
   end
 
-  def handle_call({:new_timer, timeout, pid}, _from, state) do
+  def handle_call({:new_timer, timeout, pid, timeout_action}, _from, state) do
     timer_ref = state[:counter]
     timeout_time = :os.system_time(:millisecond)+timeout
-    queue_item = %{timer: timer_ref, timeout: timeout_time, pid: pid}
+    queue_item = %{timer_ref: timer_ref, timeout: timeout_time, pid: pid, timeout_action: timeout_action}
     {:ok, item_ref} = :epqueue.insert(state[:pqueue], queue_item, timeout_time)
     map_item = Map.put(queue_item,:pqueue_ref,item_ref)
     new_state =
@@ -29,7 +30,7 @@ defmodule Gtimer do
       case Map.get(state[:map],timer_ref,:undefined) do
         :undefined ->
           state
-       map_item ->
+        map_item ->
           pqueue_ref = map_item[:pqueue_ref]
           :epqueue.remove(state[:pqueue],pqueue_ref)
           %{ state | map: Map.drop(state[:map],[timer_ref]) }
@@ -45,8 +46,20 @@ defmodule Gtimer do
   def handle_info(:timeout, state) do
     {:ok, queue_item, _} = :epqueue.pop(state[:pqueue])
     # We should do a user defined action here...
-    IO.puts("Pid #{inspect queue_item[:pid]} timed out; terminating...")
-    Process.exit(queue_item[:pid],:timed_out)
+    pid = queue_item[:pid]
+    timeout_action = queue_item[:timeout_action]
+    if is_function(timeout_action,1) do
+      try do
+        timeout_action.(pid)
+      rescue
+        _ -> IO.puts("*** ERROR: Gtimer: timeout_function raised an exception")
+      end
+    else
+      if Process.alive?(pid) do
+        IO.puts("Pid #{inspect pid} timed out; terminating...")
+        Process.exit(pid,:timed_out)
+      end
+    end
     new_state = %{ state | map: Map.drop(state[:map],[queue_item[:timer_ref]])}
     case calculate_timeout(new_state) do
       {:ok, next_time} ->
@@ -73,20 +86,22 @@ defmodule Gtimer do
     end
   end
 
-  def new_timer(timeout) do
+  def new_timer(timeout,timeout_action \\ nil) do
     case Process.whereis(:gtimer) do
       nil ->
-        {:ok, _pid} = GenServer.start_link(Gtimer, [], [{:name, :gtimer}])
+        # Do not link to the calling process; we are likely to kill it!
+        GenServer.start(Gtimer, [], [{:name, :gtimer}])
         new_timer(timeout)
       _pid ->
-        GenServer.call(:gtimer,{:new_timer, timeout, self()})
+        GenServer.call(:gtimer,{:new_timer, timeout, self(), timeout_action})
     end
   end
 
   def cancel_timer(time_ref) do
     case Process.whereis(:gtimer) do
       nil ->
-        {:ok, _pid} = GenServer.start_link(Gtimer, [], [{:name, :gtimer}])
+        # Do not link to the calling process; we are likely to kill it!
+        GenServer.start(Gtimer, [], [{:name, :gtimer}])
         cancel_timer(time_ref)
       _pid ->
         GenServer.call(:gtimer,{:cancel_timer, time_ref})
