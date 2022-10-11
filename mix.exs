@@ -21,7 +21,7 @@ defmodule Gtimer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:epqueue, git: "git@github.com:silviucpp/epqueue.git"}
+      {:epqueue, "~> 1.2"}
     ]
   end
 end
