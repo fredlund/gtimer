@@ -21,7 +21,8 @@ defmodule Gtimer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:epqueue, "~> 1.2"}
+      {:epqueue, "~> 1.2"},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]
   end
 end
