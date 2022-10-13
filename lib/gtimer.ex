@@ -17,8 +17,7 @@ defmodule Gtimer do
   default action of terminating the process that created the timer, 
   and displaying an informative message, will be taken.
   
-  Timer management is done in a separate process which will be linked
-  to the process executing the new_timer call.  Inside the process
+  Timer management is done in a separate process. Inside the process
   timers are stored in a priority queue, and using a map, which
   affords logarithmic worst-case time complexity for both function
   calls (in terms of the number of timers running).
