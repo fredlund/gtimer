@@ -1,4 +1,4 @@
-defmodule Gtimer.MixProject do
+defmodule Gtimer.Mixfile do
   use Mix.Project
 
   def project do
@@ -7,7 +7,16 @@ defmodule Gtimer.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package()
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["BSD-3-Clause"],
+      links: %{},
+      description: "A small library which provides a global timer facility in Elixir (or Erlang)"
     ]
   end
 
